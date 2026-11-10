@@ -1,0 +1,16 @@
+{
+  "name": "PING PONG MASTER",
+  "short_name": "PING PONG",
+  "description": "ネオンの卓球台で遊ぶ卓球ゲーム。練習・試合・大会。",
+  "lang": "ja",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#060918",
+  "theme_color": "#060918",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

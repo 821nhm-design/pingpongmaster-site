@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ja" data-root="">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>購入した商品を再表示 | {shop}</title>
+<meta name="description" content="購入した商品の受け取り直し">
+<meta name="theme-color" content="#070b22">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=Dela+Gothic+One&family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap">
+<link rel="stylesheet" href="style.css">
+<script src="config.js"></script>
+<script src="shop.js"></script>
+</head>
+<body>
+<main class="wrap doc">
+  <div class="eyebrow">RESTORE</div>
+  <h1>購入した商品を再表示</h1>
+  <form class="panel" id="f">
+    <p style="margin:0">購入したときのメールアドレスと、支払いに使ったカード番号の<b>下4桁</b>を入力してください。</p>
+    <label class="f">メールアドレス<input type="email" id="em" required autocomplete="email"></label>
+    <label class="f">カード番号の下4桁<input type="text" id="l4" inputmode="numeric" pattern="\d{4}" maxlength="4" required></label>
+    <div class="row"><button class="btn pri" type="submit">再表示する</button><span class="status" id="st"></span></div>
+  </form>
+  <div id="out" style="margin-top:16px;display:flex;flex-direction:column;gap:12px"></div>
+</main>
+<script>
+document.getElementById('f').addEventListener('submit',async e=>{
+  e.preventDefault();const {esc}=STORE;const st=document.getElementById('st'),out=document.getElementById('out');
+  st.className='status';st.textContent='確認しています…';out.innerHTML='';
+  try{const r=await fetch('/api/restore',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email:document.getElementById('em').value.trim(),last4:document.getElementById('l4').value.trim()})});const d=await r.json();
+    if(!d.ok){st.className='status err';st.textContent='入力内容を確認してください。';return}
+    if(!d.items.length){st.className='status err';st.textContent='該当する購入が見つかりませんでした。メールアドレスと下4桁をご確認ください。';return}
+    st.className='status ok';st.textContent=d.items.length+'件見つかりました。';const sv=d.seller||{};
+    out.innerHTML=d.items.map(it=>{if(it.type==='game'&&it.code){try{localStorage.setItem('ppm-license',JSON.stringify({code:it.code,pid:it.pid,at:Date.now()}))}catch(e){}}
+      return `<div class="panel"><h2 style="font-size:18px">${esc(it.name)}</h2>${it.type==='game'&&it.code?`<div class="code">${esc(it.code)}</div><a class="btn pri" href="${esc(it.url)}">ゲームを開く（この端末もフル版になりました）</a>`:it.url?`<a class="btn pri" href="${esc(it.url)}" target="_blank" rel="noopener">ダウンロードする</a>`:`<p class="status err">${esc(it.note||'')}</p>`}</div>`}).join('')+(sv.address||sv.phone?`<div class="panel"><h2 style="font-size:17px">販売事業者の情報</h2><p style="margin:0">${esc(sv.name||'')}<br>所在地：${esc(sv.address||'')}<br>電話番号：${esc(sv.phone||'')}<br>お問い合わせ：${esc(sv.email||'')}</p></div>`:'');
+  }catch(err){st.className='status err';st.textContent='通信できませんでした。時間をおいてもう一度お試しください。'}
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ja" data-root="">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>PingPongMaster｜沖縄から発信する卓球の総合サイト</title>
+<meta name="description" content="卓球の技の解説、卓球ゲーム「PING PONG MASTER」、練習に役立つ資料をひとつにまとめた卓球の総合サイト。">
+<meta property="og:title" content="PingPongMaster｜沖縄から発信する卓球の総合サイト">
+<meta property="og:description" content="卓球の技の解説、卓球ゲーム「PING PONG MASTER」、練習に役立つ資料をひとつにまとめた卓球の総合サイト。">
+<meta property="og:image" content="assets/ppm-cover.png">
+<meta name="theme-color" content="#070b22">
+<link rel="icon" href="game/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=Dela+Gothic+One&family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap">
+<link rel="stylesheet" href="style.css">
+<script src="config.js"></script>
+<script src="shop.js"></script>
+</head>
+<body>
+<main>
+  <div class="wrap">
+    <section class="portal-hero">
+      <div>
+        <div class="eyebrow">TABLE TENNIS PORTAL · OKINAWA</div>
+        <h1>卓球を、<br><span>学ぶ・遊ぶ・手に入れる。</span></h1>
+        <p class="lead" id="tagline">PingPongMasterは、沖縄から発信する卓球の総合サイトです。技の解説、卓球ゲーム、練習に役立つ資料を、ひとつの場所にまとめています。</p>
+        <div class="row"><a class="btn pri big" href="game/">ゲームを無料で遊ぶ</a><a class="btn big" href="learn.html">技を学ぶ</a></div>
+      </div>
+      <a class="shot" style="padding:0;display:block;border-radius:18px;overflow:hidden;border:1px solid var(--line)" href="game/"><img src="assets/ppm-cover.png" alt="卓球ゲームPING PONG MASTERの画面。ネオンの卓球台で2人の選手が打ち合っている" width="1200" height="675"></a>
+    </section>
+    <nav class="hub" aria-label="コンテンツ">
+      <a href="learn.html"><small>LEARN</small><b>技を学ぶ</b><span>ドライブ・チキータ・ツッツキなど11の技</span></a>
+      <a href="game/"><small>GAME</small><b>ゲーム</b><span>琉球ビーチで練習、世界の選手と試合</span></a>
+      <a href="store.html"><small>STORE</small><b>ストア</b><span>資料・PDF・動画・ゲーム・アプリ</span></a>
+      <a href="#videos"><small>VIDEO</small><b>動画</b><span>プレー動画と解説</span></a>
+    </nav>
+  </div>
+
+  <section class="block" style="margin-top:34px">
+    <div class="wrap">
+      <div class="sec-head"><div><div class="eyebrow">LEARN</div><h2>技を学ぶ</h2></div><a href="learn.html">11の技をすべて見る →</a></div>
+      <div class="techs" id="techPick"></div>
+    </div>
+  </section>
+
+  <section class="block band">
+    <div class="wrap" style="padding-block:6px">
+      <div class="sec-head"><div><div class="eyebrow">GAME</div><h2>卓球ゲーム PING PONG MASTER</h2></div></div>
+      <p class="muted" style="margin:0 0 14px;max-width:40em">ネオンの卓球台で、技を練習して級を上げ、世界の選手と試合や大会に挑みます。スマホ・iPad・パソコンで遊べて、無料で2回試せます。気に入ったら買い切り500円でずっと遊べます。</p>
+      <div class="row"><a class="btn pri" href="game/">無料で遊ぶ</a><a class="btn" href="item.html?id=ppm-game">フル版について</a></div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="sec-head"><div><div class="eyebrow">STORE</div><h2>ストア</h2></div><a href="store.html">ストアへ →</a></div>
+      <div class="grid" id="pick"></div>
+    </div>
+  </section>
+
+  <section class="block" id="videos">
+    <div class="wrap">
+      <div class="sec-head"><div><div class="eyebrow">VIDEO</div><h2>動画</h2></div></div>
+      <div id="videoBox"></div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="sec-head"><div><div class="eyebrow">NEWS</div><h2>お知らせ</h2></div></div>
+      <div class="news" id="news"></div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap" style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px" id="aboutGrid">
+      <div><div class="eyebrow">ABOUT</div><h2>PingPongMasterについて</h2><p class="muted">卓球の楽しさを、沖縄から。技を知る、ゲームで遊ぶ、資料で深める。卓球が好きな人も、これから始める人も、ここから楽しめるサイトを目指しています。</p></div>
+      <div><div class="eyebrow">CONTACT</div><h2>お問い合わせ</h2><p class="muted" id="contact">準備中です。</p><div class="social" id="social"></div></div>
+    </div>
+  </section>
+</main>
+<script>
+(async()=>{
+  const {esc,yen,products,CATS,S}=STORE;
+  const r=await fetch('techs.json').then(r=>r.json()).catch(()=>[]);
+  document.getElementById('techPick').innerHTML=r.slice(0,4).map(t=>`<div class="tech"><span class="k">${esc(t.en)}</span><b>${esc(t.name)}</b><p>${esc(t.what)}</p></div>`).join('');
+  const list=await products();
+  const show=list.slice(0,3);
+  const soon=['document','video','app'].filter(c=>!list.some(p=>p.category===c)).slice(0,Math.max(0,3-show.length));
+  document.getElementById('pick').innerHTML=show.map(p=>`<a class="card" href="item.html?id=${encodeURIComponent(p.id)}"><div class="img">${p.image?`<img src="${esc(p.image)}" alt="" loading="lazy">`:''}</div><div class="body"><span class="cat">${esc(CATS[p.category]||'')}</span><span class="t">${esc(p.title)}</span><span class="muted" style="font-size:13px">${esc(p.short||'')}</span><span class="p">${p.price?yen(p.price):'無料'}</span></div></a>`).concat(soon.map(c=>`<div class="card soon"><div class="img">${esc(CATS[c])}</div><div class="body"><span class="t">準備中</span><span class="muted" style="font-size:13px">公開までもうしばらくお待ちください。</span></div></div>`)).join('');
+  document.getElementById('videoBox').innerHTML=S.youtubeUrl?`<p class="muted" style="margin:0 0 12px">プレー動画や技の解説をYouTubeで公開しています。</p><a class="btn pri" href="${esc(S.youtubeUrl)}" target="_blank" rel="noopener">YouTubeで見る</a>`:'<p class="muted" style="margin:0">動画は準備中です。</p>';
+  document.getElementById('news').innerHTML=(S.news||[]).map(n=>{const inner=`<time datetime="${esc(n.date)}">${esc(String(n.date).replace(/-/g,'.'))}</time><span>${esc(n.title)}</span>`;return n.url?`<a href="${esc(n.url)}">${inner}</a>`:`<div>${inner}</div>`}).join('')||'<p class="muted">お知らせはまだありません。</p>';
+  document.getElementById('contact').textContent=S.email?('メール：'+S.email):'お問い合わせ先は準備中です。';
+  document.getElementById('social').innerHTML=[['lineUrl','LINEで友だち追加','line'],['youtubeUrl','YouTube',''],['xUrl','X',''],['instagramUrl','Instagram','']].filter(([k])=>S[k]).map(([k,t,c])=>`<a class="btn ${c}" href="${esc(S[k])}" target="_blank" rel="noopener">${t}</a>`).join('');
+  const g=document.getElementById('aboutGrid');const mq=matchMedia('(max-width:760px)');const f=()=>g.style.gridTemplateColumns=mq.matches?'1fr':'minmax(0,1fr) minmax(0,1fr)';f();mq.addEventListener&&mq.addEventListener('change',f);
+})();
+</script>
+</body>
+</html>

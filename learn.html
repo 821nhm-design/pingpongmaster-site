@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ja" data-root="">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>技を学ぶ｜PingPongMaster</title>
+<meta name="description" content="ドライブ、チキータ、ツッツキ、スマッシュなど、卓球の11の技を、いつ使うか・コツと合わせて解説します。">
+<meta property="og:title" content="技を学ぶ｜PingPongMaster">
+<meta property="og:description" content="ドライブ、チキータ、ツッツキ、スマッシュなど、卓球の11の技を、いつ使うか・コツと合わせて解説します。">
+<meta property="og:image" content="assets/ppm-cover.png">
+<meta name="theme-color" content="#070b22">
+<link rel="icon" href="game/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=Dela+Gothic+One&family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap">
+<link rel="stylesheet" href="style.css">
+<script src="config.js"></script>
+<script src="shop.js"></script>
+</head>
+<body>
+<main class="wrap" style="padding-block:28px">
+  <div class="eyebrow">LEARN</div>
+  <h1>技を学ぶ</h1>
+  <p class="muted" style="max-width:40em">卓球のよく使う11の技を、「どんな技か」「いつ使うか」「コツ」でまとめました。読んだら、ゲームの練習モードで実際に打ってみましょう（10級から1級まで）。</p>
+  <div class="techs" id="all" style="margin-top:18px"></div>
+  <section class="panel" style="margin-top:24px">
+    <h2 style="font-size:20px">ゲームで練習する</h2>
+    <p class="muted" style="margin:0">PING PONG MASTERの練習モードでは、コーチが出すボールを指定の技で返して級を上げていきます。無料で2回遊べます。</p>
+    <div class="row"><a class="btn pri" href="game/">ゲームで練習する</a></div>
+  </section>
+</main>
+<script>
+(async()=>{const {esc}=STORE;const r=await fetch('techs.json').then(r=>r.json()).catch(()=>[]);
+document.getElementById('all').innerHTML=r.map(t=>`<article class="tech" id="${esc(t.id)}"><span class="k">${esc(t.en)}</span><b>${esc(t.name)}</b><p>${esc(t.what)}</p><dl><dt>いつ</dt><dd>${esc(t.when)}</dd><dt>コツ</dt><dd>${esc(t.point)}</dd></dl></article>`).join('')})();
+</script>
+</body>
+</html>

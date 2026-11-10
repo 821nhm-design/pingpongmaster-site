@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ja" data-root="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>プライバシーポリシー | {shop}</title>
+<meta name="theme-color" content="#070b22">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=Dela+Gothic+One&family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap">
+<link rel="stylesheet" href="../style.css">
+<script src="../config.js"></script>
+<script src="../shop.js"></script>
+</head>
+<body>
+<main class="wrap doc">
+<h1>プライバシーポリシー</h1>
+<p><span data-v="seller"></span>（以下「当方」）は、<span data-v="name"></span>（以下「本サービス」）でお預かりする個人情報を、次のとおり取り扱います。</p>
+<h2>1. 取得する情報</h2>
+<ul>
+<li>ご購入時にお支払いサービスStripeを通じて取得する、お名前・メールアドレス・お支払い状況。クレジットカード番号は当方では受け取らず、Stripeが管理します（再表示のためにカード番号の下4桁を照合することがあります）。</li>
+<li>お問い合わせでいただいたお名前・メールアドレス・お問い合わせ内容。</li>
+<li>ゲームの進み具合や購入コードなど、お使いの端末のブラウザ内に保存される情報（当方のサーバーには送られません）。</li>
+<li>サイトを配信するCloudflareが記録するアクセス情報（IPアドレス、ブラウザの種類など）。</li>
+</ul>
+<h2>2. 利用目的</h2>
+<ul><li>商品の提供、購入内容の確認、領収書・購入確認・受け取り完了のお知らせの送付</li><li>新しい商品のご案内（受け取り完了のお知らせに付けてお送りします。不要な場合はご返信で停止できます）</li><li>お問い合わせへの対応</li><li>不正利用の防止</li><li>サービスの改善</li></ul>
+<h2>3. 第三者への提供</h2>
+<p>法令に基づく場合を除き、ご本人の同意なく第三者に提供しません。ただし、上記の目的のために、次の事業者のサービスを利用し、必要な範囲で情報を取り扱わせます：Stripe（決済）、Cloudflare（サイト配信・注文の記録）、Resend（メール送信・利用する場合）、LINEヤフー（LINE公式アカウントでやり取りする場合）。これらの事業者には海外の事業者が含まれます。</p>
+<h2>4. 安全管理</h2>
+<p>取得した情報は、漏えい・紛失を防ぐため適切に管理します。</p>
+<h2>5. 開示・訂正・削除のご請求</h2>
+<p>ご本人からのご請求があった場合、本人確認のうえ、遅滞なく対応します。下記のメールアドレスまでご連絡ください。</p>
+<h2>6. お問い合わせ</h2>
+<p><span data-v="email"></span></p>
+<h2>7. 改定</h2>
+<p>このポリシーは、必要に応じて改定し、このページでお知らせします。</p>
+<p class="note">最終更新：<span data-v="updated"></span></p>
+<script>
+document.querySelectorAll("[data-v]").forEach(el=>{const v=(window.SHOP||{})[el.dataset.v];if(v){el.textContent=v}else{el.textContent="【未設定：管理画面の「お店の設定」で入力してください】";el.classList.add("empty")}});
+</script></main></body></html>

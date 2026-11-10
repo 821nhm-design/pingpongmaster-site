@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ja" data-root="">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>注文一覧 | {shop}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=Dela+Gothic+One&family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap">
+<link rel="stylesheet" href="style.css">
+<script src="config.js"></script>
+<script src="shop.js"></script>
+</head>
+<body>
+<main class="wrap" style="padding-block:28px">
+  <div class="eyebrow">FOR SELLER</div>
+  <h1 style="font-size:28px">注文一覧（販売者用）</h1>
+  <form class="panel" id="f" style="max-width:520px;margin-top:14px">
+    <label class="f">合言葉（Cloudflareに入れた ADMIN_KEY）<input type="text" id="k" autocomplete="off" required></label>
+    <div class="row"><button class="btn pri" type="submit">表示する</button><span class="status" id="st"></span></div>
+  </form>
+  <div id="sum" class="row" style="margin-top:16px"></div>
+  <div style="overflow-x:auto;margin-top:12px"><table class="tbl" id="tb" style="min-width:640px"></table></div>
+</main>
+<script>
+document.getElementById('f').addEventListener('submit',async e=>{
+  e.preventDefault();const {esc,yen}=STORE;const st=document.getElementById('st');st.className='status';st.textContent='読み込んでいます…';
+  const k=document.getElementById('k').value.trim();
+  try{const r=await fetch('/api/orders',{headers:{'x-admin-key':k}});const d=await r.json();
+    if(!d.ok){st.className='status err';st.textContent=d.reason==='auth'?'合言葉が違います。':d.reason==='no_kv'?'注文の記録（KV）がまだ設定されていません。手順書の「KVの設定」をご覧ください。':'読み込めませんでした。';return}
+    st.className='status ok';st.textContent=d.orders.length+'件';
+    const total=d.orders.reduce((a,o)=>a+(o.amount||0),0),got=d.orders.filter(o=>o.received).length;
+    document.getElementById('sum').innerHTML=`<div class="panel" style="flex:1 1 160px"><span class="muted">注文</span><b style="font-size:24px">${d.orders.length}件</b></div><div class="panel" style="flex:1 1 160px"><span class="muted">売上（税込）</span><b style="font-size:24px">${yen(total)}</b></div><div class="panel" style="flex:1 1 160px"><span class="muted">受け取り済み</span><b style="font-size:24px">${got} / ${d.orders.length}</b></div>`;
+    document.getElementById('tb').innerHTML='<tr><th>注文日時</th><th>商品</th><th>購入者</th><th>金額</th><th>受け取り</th></tr>'+d.orders.map(o=>`<tr><td>${esc(new Date(o.at).toLocaleString('ja-JP'))}</td><td>${esc(o.name)}</td><td>${esc(o.email)}</td><td>${yen(o.amount||0)}</td><td>${o.received?`<span style="color:var(--ok)">済み</span><br><span class="muted" style="font-size:12px">${esc(new Date(o.receivedAt).toLocaleString('ja-JP'))}</span>`:'<span style="color:var(--gold)">まだ</span>'}</td></tr>`).join('');
+  }catch(err){st.className='status err';st.textContent='通信できませんでした。'}
+});
+</script>
+</body>
+</html>
