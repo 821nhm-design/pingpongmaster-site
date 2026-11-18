@@ -23,7 +23,7 @@
 
   function header(){
     const here = location.pathname.split('/').pop() || 'index.html';
-    const L = [['index.html','ホーム'],['learn.html','技を学ぶ'],['game/','ゲーム'],['store.html','ストア'],['restore.html','購入した商品']];
+    const L = [['index.html','ホーム'],['pr.html','動画'],['learn.html','技を学ぶ'],['game/','ゲーム'],['store.html','ストア'],['restore.html','購入した商品']];
     const h = document.createElement('header'); h.className = 'site';
     h.innerHTML = `<div class="wrap"><a class="logo" href="${root}index.html">${esc(S.name || 'PingPongMaster')}</a>
       <button class="menu-btn" type="button" aria-expanded="false" aria-controls="mainnav">メニュー</button>

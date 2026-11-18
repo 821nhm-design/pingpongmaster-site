@@ -41,6 +41,7 @@ h3{font-size:16px;margin:0}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);background:var(--tint);color:var(--ink);border-radius:12px;padding:12px 18px;font:inherit;font-weight:700;text-decoration:none;cursor:pointer}
 .btn.pri{background:var(--grad);border-color:transparent;color:#fff}
 .btn.line{background:#06c755;border-color:#06c755;color:#fff}
+.btn.sm{padding:6px 12px;font-size:13px;min-height:0}
 .btn.big{padding:15px 22px;font-size:17px}
 .btn:disabled,.btn[aria-disabled="true"]{opacity:.5;cursor:default}
 .btn:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--ao);outline-offset:2px}
