@@ -60,7 +60,7 @@
   </section>
 </main>
 <script>
-(()=>{const url=location.origin+'/pr.html';
+(()=>{const url='https://pingpongai-fy83ekxm.manus.space/';
  document.querySelectorAll('.share').forEach(el=>{const t=`ピンポンマスターの動画「${el.dataset.v}」 めんそーれ、ピンポンマスターへ。 #ピンポンマスター挑戦 #卓球 #沖縄`;const u=encodeURIComponent(url),tx=encodeURIComponent(t);
   el.innerHTML=`<a class="btn sm" target="_blank" rel="noopener" href="https://twitter.com/intent/tweet?text=${tx}&url=${u}">Xでシェア</a><a class="btn sm line" target="_blank" rel="noopener" href="https://social-plugins.line.me/lineit/share?url=${u}&text=${tx}">LINEで送る</a><a class="btn sm" target="_blank" rel="noopener" href="https://www.facebook.com/sharer/sharer.php?u=${u}">Facebook</a>`+(navigator.share?`<button class="btn sm" type="button">ほかのアプリで送る</button>`:'');
   const b=el.querySelector('button');if(b)b.onclick=()=>navigator.share({title:'ピンポンマスター',text:t,url}).catch(()=>{});});
