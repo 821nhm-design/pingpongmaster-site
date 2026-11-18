@@ -20,7 +20,7 @@
     <div class="row"><button class="btn pri" type="submit">表示する</button><span class="status" id="st"></span></div>
   </form>
   <div id="sum" class="row" style="margin-top:16px"></div>
-  <div style="overflow-x:auto;margin-top:12px"><table class="tbl" id="tb" style="min-width:640px"></table></div>
+  <div style="overflow-x:auto;margin-top:12px"><table class="tbl" id="tb" style="min-width:760px"></table></div>
 </main>
 <script>
 document.getElementById('f').addEventListener('submit',async e=>{
@@ -31,7 +31,11 @@ document.getElementById('f').addEventListener('submit',async e=>{
     st.className='status ok';st.textContent=d.orders.length+'件';
     const total=d.orders.reduce((a,o)=>a+(o.amount||0),0),got=d.orders.filter(o=>o.received).length;
     document.getElementById('sum').innerHTML=`<div class="panel" style="flex:1 1 160px"><span class="muted">注文</span><b style="font-size:24px">${d.orders.length}件</b></div><div class="panel" style="flex:1 1 160px"><span class="muted">売上（税込）</span><b style="font-size:24px">${yen(total)}</b></div><div class="panel" style="flex:1 1 160px"><span class="muted">受け取り済み</span><b style="font-size:24px">${got} / ${d.orders.length}</b></div>`;
-    document.getElementById('tb').innerHTML='<tr><th>注文日時</th><th>商品</th><th>購入者</th><th>金額</th><th>受け取り</th></tr>'+d.orders.map(o=>`<tr><td>${esc(new Date(o.at).toLocaleString('ja-JP'))}</td><td>${esc(o.name)}</td><td>${esc(o.email)}</td><td>${yen(o.amount||0)}</td><td>${o.received?`<span style="color:var(--ok)">済み</span><br><span class="muted" style="font-size:12px">${esc(new Date(o.receivedAt).toLocaleString('ja-JP'))}</span>`:'<span style="color:var(--gold)">まだ</span>'}</td></tr>`).join('');
+    document.getElementById('tb').innerHTML='<tr><th>注文日時</th><th>商品</th><th>購入者</th><th>金額</th><th>受け取り</th><th>ゲームの端末</th></tr>'+d.orders.map(o=>`<tr><td>${esc(new Date(o.at).toLocaleString('ja-JP'))}</td><td>${esc(o.name)}</td><td>${esc(o.email)}</td><td>${yen(o.amount||0)}</td><td>${o.received?`<span style="color:var(--ok)">済み</span><br><span class="muted" style="font-size:12px">${esc(new Date(o.receivedAt).toLocaleString('ja-JP'))}</span>`:'<span style="color:var(--gold)">まだ</span>'}</td><td>${o.type!=='game'?'—':o.lic?`登録あり・引っ越し${o.lic.moves||0}/1回<br><button class="btn sm" data-reset="${esc(o.code)}">端末の登録を消す</button>`:'まだ登録なし'}</td></tr>`).join('');
+    document.getElementById('tb').onclick=async ev=>{const b=ev.target.closest('[data-reset]');if(!b)return;
+      if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='もう一度押すと消します';return}
+      b.disabled=true;b.textContent='消しています…';
+      try{const r=await fetch('/api/license-reset',{method:'POST',headers:{'x-admin-key':k,'content-type':'application/json'},body:JSON.stringify({code:b.dataset.reset})});const d=await r.json();b.textContent=d.ok?'消しました（次に入れた端末が1台目になります）':'消せませんでした'}catch(e){b.textContent='通信できませんでした'}};
   }catch(err){st.className='status err';st.textContent='通信できませんでした。'}
 });
 </script>

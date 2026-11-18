@@ -64,6 +64,29 @@ async function checkCode(env, code) {
   return safeEqual(good, sig) ? pid : null;
 }
 
+/* ゲームの利用端末：1つの購入コードで同時に使えるのは1台。機種変更（引っ越し）は1回だけ */
+const MAX_MOVES = 1;
+const normEmail = s => String(s || '').trim().toLowerCase();
+const goodDevice = s => /^[A-Za-z0-9-]{16,64}$/.test(String(s || ''));
+async function orderEmail(env, code) { const o = await kvGet(env, 'o:' + code); return o ? normEmail(o.email) : ''; }
+async function activate(env, code, email, device, confirmMove) {
+  const pid = await checkCode(env, code);
+  if (!pid) return { ok: false, reason: 'bad_code' };
+  if (!goodDevice(device)) return { ok: false, reason: 'bad_device' };
+  if (!env.STORE_KV) return { ok: true, pid, nokv: true };
+  const owner = await orderEmail(env, code);
+  if (owner && email !== null && normEmail(email) !== owner) return { ok: false, reason: 'email' };
+  const key = 'lic:' + code;
+  const lic = (await kvGet(env, key)) || null;
+  if (!lic) { await kvPut(env, key, { device, moves: 0, at: new Date().toISOString() }); return { ok: true, pid, movesLeft: MAX_MOVES }; }
+  if (lic.device === device) return { ok: true, pid, movesLeft: Math.max(0, MAX_MOVES - (lic.moves || 0)) };
+  if ((lic.moves || 0) >= MAX_MOVES) return { ok: false, reason: 'limit' };
+  if (!confirmMove) return { ok: false, reason: 'move_needed', movesLeft: MAX_MOVES - (lic.moves || 0) };
+  lic.device = device; lic.moves = (lic.moves || 0) + 1; lic.movedAt = new Date().toISOString();
+  await kvPut(env, key, lic);
+  return { ok: true, pid, moved: true, movesLeft: Math.max(0, MAX_MOVES - lic.moves) };
+}
+
 /* 支払い済みの注文から、渡すものを作り、注文を記録する */
 async function deliverables(env, origin, session) {
   const paid = session.payment_status === 'paid' || session.payment_status === 'no_payment_required';
@@ -111,7 +134,7 @@ async function mailOrder(env, origin, d, session) {
   const shop = shopName(env);
   await sendMail(env, d.email, `【${shop}】ご購入ありがとうございます（ご注文の確認）`,
     `<p>このたびは${h(shop)}でご購入いただき、ありがとうございます。お支払いを確認しました。</p>${itemsHtml(d.items)}
-     <p>ゲームの購入コードは、ほかの端末で遊ぶときに入力します。ダウンロードリンクは、あとから何度でもお使いいただけます。</p>
+     <p>ゲームは、1つの購入コードで1台の端末で遊べます。機種変更のときは、新しい端末でこのメールアドレスと購入コードを入力すると、引っ越しできます（引っ越しは1回まで。前の端末では遊べなくなります）。購入コードは人に教えないでください。</p>
      <p>デジタル商品のため、お支払い後の返品・キャンセルはお受けしていません。不具合で使えない場合は、このメールにご返信ください。</p>${mailFooter(env, origin)}`);
   if (env.SELLER_EMAIL) await sendMail(env, env.SELLER_EMAIL, `【${shop}】注文が入りました：${d.items.map(i => i.name).join('、')}`,
     `<p>新しい注文がありました。</p><p>商品：${h(d.items.map(i => i.name).join('、'))}<br>金額：¥${Number(session.amount_total || 0).toLocaleString('ja-JP')}<br>購入者：${h(d.email)}<br>日時：${new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })}</p><p>受け取り（ダウンロード）されると、もう一度お知らせします。注文一覧：${h(origin)}/orders.html</p>`);
@@ -150,6 +173,11 @@ export default {
     const url = new URL(request.url);
     const origin = url.origin;
     if (!url.pathname.startsWith('/api/')) return env.ASSETS.fetch(request);
+    // 設定の確認用（秘密の値は出さず、入っているかどうかだけ）
+    if (url.pathname === '/api/health') {
+      const k = String(env.STRIPE_SECRET_KEY || '');
+      return json({ ok: true, stripe: !!k, stripeMode: k.includes('_live_') ? 'live' : k.includes('_test_') ? 'test' : 'none', license: !!env.LICENSE_SECRET, admin: !!env.ADMIN_KEY, kv: !!env.STORE_KV, mail: !!(env.RESEND_API_KEY && env.MAIL_FROM), webhook: !!env.STRIPE_WEBHOOK_SECRET });
+    }
     if (!env.STRIPE_SECRET_KEY || !env.LICENSE_SECRET) return json({ ok: false, reason: 'not_configured' }, 503);
     const later = p => { if (ctx && ctx.waitUntil) ctx.waitUntil(p); else return p; };
     try {
@@ -171,12 +199,33 @@ export default {
         await later(markReceived(env, origin, code));
         return Response.redirect(target, 302);
       }
-      // ゲーム：購入コードの確認（ほかの端末）
+      // ゲーム：この端末で使えるようにする（メールアドレス＋購入コード）
+      if (url.pathname === '/api/activate' && request.method === 'POST') {
+        const b = await request.json();
+        const code = String(b.code || '').trim();
+        const r = await activate(env, code, String(b.email || ''), String(b.device || ''), !!b.confirmMove);
+        if (r.ok) await later(markReceived(env, origin, code));
+        return json(r);
+      }
+      // ゲーム：保存してある購入コードが、まだこの端末で使えるか確認
       if (url.pathname === '/api/verify' && request.method === 'POST') {
-        const { code } = await request.json();
+        const b = await request.json();
+        const code = String(b.code || '').trim();
         const pid = await checkCode(env, code);
-        if (pid) await later(markReceived(env, origin, String(code).trim()));
-        return json(pid ? { ok: true, pid } : { ok: false });
+        if (!pid) return json({ ok: false, reason: 'bad_code' });
+        if (!env.STORE_KV || !goodDevice(b.device)) return json({ ok: true, pid });
+        const lic = await kvGet(env, 'lic:' + code);
+        if (!lic) { const r = await activate(env, code, null, String(b.device), false); return json(r); }
+        if (lic.device !== b.device) return json({ ok: false, reason: 'other_device' });
+        return json({ ok: true, pid, movesLeft: Math.max(0, MAX_MOVES - (lic.moves || 0)) });
+      }
+      // 販売者用：端末の登録を消す（お問い合わせで特別に戻すとき）
+      if (url.pathname === '/api/license-reset' && request.method === 'POST') {
+        if (!env.ADMIN_KEY || !safeEqual(request.headers.get('x-admin-key') || '', env.ADMIN_KEY)) return json({ ok: false, reason: 'auth' }, 401);
+        if (!env.STORE_KV) return json({ ok: false, reason: 'no_kv' });
+        const { code } = await request.json();
+        await env.STORE_KV.delete('lic:' + String(code || '').trim());
+        return json({ ok: true });
       }
       // 購入情報の再表示：メールアドレス＋カード下4桁
       if (url.pathname === '/api/restore' && request.method === 'POST') {
@@ -198,7 +247,7 @@ export default {
         if (!env.STORE_KV) return json({ ok: false, reason: 'no_kv' });
         const keys = await env.STORE_KV.list({ prefix: 'o:', limit: 200 });
         const orders = [];
-        for (const k of keys.keys) { const v = await kvGet(env, k.name); if (v) orders.push(v); }
+        for (const k of keys.keys) { const v = await kvGet(env, k.name); if (v) { if (v.type === 'game') v.lic = await kvGet(env, 'lic:' + v.code); orders.push(v); } }
         orders.sort((a, b) => String(b.at).localeCompare(String(a.at)));
         return json({ ok: true, orders });
       }

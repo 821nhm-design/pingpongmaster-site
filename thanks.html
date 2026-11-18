@@ -29,10 +29,14 @@
   let d=null;
   for(let i=0;i<4&&!(d&&d.ok);i++){try{const r=await fetch('/api/claim?session_id='+encodeURIComponent(sid));d=await r.json()}catch(e){d=null}if(!(d&&d.ok))await new Promise(r=>setTimeout(r,1500))}
   if(!d||!d.ok){box.innerHTML=`<p class="status err">${d&&d.reason==='unpaid'?'お支払いの確認がまだ取れていません。少し待ってからこのページを再読み込みしてください。':'購入内容を確認できませんでした。お支払いは完了しています。お手数ですが、お問い合わせください。'}</p>${d&&d.reason&&d.reason!=='unpaid'?`<p class="note" style="margin:0">理由：${esc(d.reason==='not_configured'?'お店の設定（Cloudflareの STRIPE_SECRET_KEY / LICENSE_SECRET）がまだ反映されていません':d.reason==='bad_session'?'注文番号の形が正しくありません（Stripeの「支払い後」のURLに {CHECKOUT_SESSION_ID} が入っているか確認）':(d.message||d.reason))}</p>`:(!d?'<p class="note" style="margin:0">理由：お店のサーバーにつながりませんでした（Cloudflareに公開したアドレスで開いているか確認）</p>':'')}`;return}
+  const dev=(()=>{try{let v=localStorage.getItem('ppm-device');if(!v){v=(crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2)).replace(/[^A-Za-z0-9-]/g,'');localStorage.setItem('ppm-device',v)}return v}catch(e){return''}})();
+  const act={};
+  for(const it of d.items){if(it.type==='game'&&it.code){try{const r=await fetch('/api/activate',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({code:it.code,email:d.email,device:dev})});act[it.code]=await r.json()}catch(e){act[it.code]=null}
+    if(act[it.code]&&act[it.code].ok){try{localStorage.setItem('ppm-license',JSON.stringify({code:it.code,pid:it.pid,at:Date.now()}))}catch(e){}}}}
   box.innerHTML='<p class="status ok" style="margin:0">お支払いを確認しました。</p>'+d.items.map(it=>{
-    if(it.type==='game'&&it.code){try{localStorage.setItem('ppm-license',JSON.stringify({code:it.code,pid:it.pid,at:Date.now()}))}catch(e){}}
+    const a=act[it.code];const here=a&&a.ok;
     return `<div style="display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--line);padding-top:12px"><h2 style="font-size:20px">${esc(it.name)}</h2>
-      ${it.type==='game'&&it.code?`<p style="margin:0">この端末は、もうフル版になっています。ほかの端末（iPadやパソコン）で遊ぶときは、この購入コードを入力してください。</p><div class="code">${esc(it.code)}</div><div class="row"><a class="btn pri big" href="${esc(it.url)}">ゲームを開く</a><button class="btn" data-copy="${esc(it.code)}">購入コードをコピー</button></div>`
+      ${it.type==='game'&&it.code?`<p style="margin:0">${here?'この端末は、もうフル版になっています。':'この購入コードは、ほかの端末で使われています。この端末で遊ぶときは、ゲームの「購入コードをお持ちの方」から引っ越してください。'}</p><p class="note" style="margin:0">1つの購入コードで遊べるのは<b>1台</b>です。機種変更のときは、新しい端末でメールアドレス（${esc(d.email||'')}）と購入コードを入れると<b>引っ越し</b>できます（<b>1回まで</b>。前の端末では遊べなくなります）。購入コードは人に教えないでください。</p><div class="code">${esc(it.code)}</div><div class="row"><a class="btn pri big" href="${esc(it.url)}">ゲームを開く</a><button class="btn" data-copy="${esc(it.code)}">購入コードをコピー</button></div>`
       : it.url?`<p style="margin:0">下のボタンからダウンロードしてください。${d.mail?'ダウンロードが完了すると、確認のメールが届きます。':''}</p><a class="btn pri big" href="${esc(it.url)}">ダウンロードする</a>`:`<p class="status err">${esc(it.note||'')}</p>`}</div>`}).join('');
   box.addEventListener('click',e=>{const b=e.target.closest('[data-copy]');if(!b)return;navigator.clipboard&&navigator.clipboard.writeText(b.dataset.copy).then(()=>b.textContent='コピーしました',()=>{})});
   const s=d.seller||{};

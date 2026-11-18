@@ -550,7 +550,7 @@ function finishDrill(){
   GS.state='idle';exitGame();
   showResult({title:pass?`${dr.level}級 合格！`:'不合格',sub:`${dr.d.name}　${dr.ok} / ${dr.total}球成功（合格は${dr.need}球）`,
     lines:[`経験値 +${xp}`+(lvOf(PROF.xp)>lvBefore?`　レベルアップ！ Lv.${lvOf(PROF.xp)}`:''),newLv?`${dr.d.name}が ${dr.level}級 になりました`:''],
-    buttons:[['もう一度','drillAgain'],pass&&dr.level>1?[`${dr.level-1}級に挑戦`,'drillNext']:null,['練習メニューへ','practice']].filter(Boolean),win:pass});
+    buttons:[['もう一度','drillAgain'],pass?['認定証をシェア','cert']:null,pass&&dr.level>1?[`${dr.level-1}級に挑戦`,'drillNext']:null,['練習メニューへ','practice']].filter(Boolean),win:pass});
   LAST_DRILL={d:dr.d,level:dr.level};
 }
 let LAST_DRILL=null;
